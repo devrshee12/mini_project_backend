@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 
 const Creater = new mongoose.Schema({
@@ -29,7 +30,6 @@ const Creater = new mongoose.Schema({
         minlength: 6,
     },
     projects:[
-
     ],
 
 
@@ -41,6 +41,21 @@ Creater.pre('save', async function () {
     const salt = await bcrypt.genSalt(10)
     this.password = await bcrypt.hash(this.password, salt)
 })
+
+
+Creater.methods.generateAuthToken = function(){
+
+    console.log(this);
+    return jwt.sign(
+        { type: "creater", email: this.email },
+        process.env.JWT_ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "30d",
+        }
+    )
+}
+    // console.log("email : : " + this.email);
+
 
 
 module.exports = mongoose.model("Creater", Creater);

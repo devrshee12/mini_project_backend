@@ -13,6 +13,10 @@ const registerCreater = async(req, res) => {
     
     try{
         const creater = await Creater.create(req.body);
+        const salt = await bcrypt.genSalt(10)
+        creater.password = await bcrypt.hash(creater.password, salt)
+        await creater.save();
+
         const token = creater.generateAuthToken();
         
         // res.status(201).json({token});
@@ -47,27 +51,25 @@ const login = async(req, res) => {
                 return res.status(404).json({"status" : "email invalid"});
             }
 
-            const dbPassword = creater.password;
             
-            bcrypt.compare(password, dbPassword, (err, data) => {
-                if(err){
-                    return res.status(404).json({"status": "something went wrong"});
-                }
+            console.log("database password", creater.password)
+            console.log("got password", password);
+            const isPasswordCorrect = await creater.comparePassword(password)
+            if (!isPasswordCorrect) {
+                return res.status(404).json({"status" : "invalid"});
+            }
+            else{
+                const token = creater.generateAuthToken();
+                console.log("login token : " + token);
+                res.cookie("token", token, {
+                    expires: new Date(Date.now() + ( 30 * 24 * 60 * 60 * 1000)), // ms
+                    httpOnly: false
+                })
+    
+                return res.status(200).json({"status": "login successful for creater", token});
 
-                if(data){
-                    const token = creater.generateAuthToken();
-                    console.log("login token : " + token);
-                    res.cookie("token", token, {
-                        expires: new Date(Date.now() + ( 30 * 24 * 60 * 60 * 1000)), // ms
-                        httpOnly: true
-                    })
+            }
 
-                    return res.status(200).json({"status": "login successful for creater", token});
-                }
-                else{
-                    return res.status(404).json({"status": "invalid password"});
-                }
-            })
 
         }
         catch(err){

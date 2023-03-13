@@ -46,6 +46,7 @@ app.use('/api/v1/dashboard', authentication, dashboard);
 
 
 
+
 app.get("/api/v1/auth/test", (req, res) => {
   console.log("called...");
   res.cookie("test", "devarshee", {
@@ -78,6 +79,6 @@ const start = async () => {
     }
   };
   
-  start();
+start();
 
 

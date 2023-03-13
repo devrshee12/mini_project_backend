@@ -1,4 +1,5 @@
 const Creater = require("../models/Creater");
+const Member = require("../models/Member");
 const Project = require("../models/Project");
 
 
@@ -84,9 +85,86 @@ const createProject = async(req, res) => {
 
 }
 
+const createMember = async(req, res) => {
+    console.log("create member");
+    const {type, email} = req.user;
+    const {memberEmail, memberName, memberPassword, projectId} = req.body;
+    if(type === "creater"){
+        try{
+            // member added to member model
+            const member = await Member.create({name: memberName, email: memberEmail, password: memberPassword});
+            // add member to project model
+            const project = await Project.findOne({_id: projectId});
+            const tempMembers = [...project.members, member];
+            project.members = tempMembers;
+            await project.save();
+            
+            // update project to creater model ... remaining
+
+            const creater = await Creater.findOne({email});
+            const itemCreater = creater.projects.map((item) => {
+                // console.log("item id is : " + item._id);
+                // console.log("project id is : " + projectId);
+                if(item._id == projectId){
+                    console.log("under id");
+                    const newItem = {...item, members: [...item.members, member]};
+                    return newItem;
+                }
+                return item;
+            })
+            // console.log("after update");
+            // console.log(itemCreater);
+
+            creater.projects = itemCreater;
+
+            await creater.save();
+
+            
+
+            return res.status(201).json({"valid": true, "status": "member created", "member": member, project, creater});
+        }
+        catch(err){
+            console.log(err);
+            return res.status(401).json({"valid": false, "status": "something went wrong"});
+        }
+    }
+    else{
+        return res.status(401).json({"valid": false, "status": "you are not allowded to create member"})
+    }
+
+}
+
+
+const getMembers = async(req, res) => {
+    const {type} = req.user;
+    const {projectId} = req.body;
+    console.log("project id : " + projectId);
+    try{
+
+        if(type === "creater"){
+            const project = await Project.findOne({_id:projectId});
+            if(!project){
+                return res.status(401).json({valid: false, "status": "something went wrong"});
+            }
+
+
+            
+            return res.status(201).json({valid: true, status: "success", members: project.members})
+        }
+        else{
+            return res.status(401).json({valid: false, "status": "something went wrong"});
+        }
+
+    }
+    catch(err){
+        console.log(err);
+    }
+}
 
 
 module.exports = {
     getUser,
-    createProject
+    createProject,
+    createMember,
+    getMembers
 }

@@ -23,8 +23,8 @@ const Project = new mongoose.Schema({
     members:[
 
     ],
-    tasks: [
-        
+    tasks:[
+
     ]
 
 

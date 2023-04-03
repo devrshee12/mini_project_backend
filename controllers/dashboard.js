@@ -496,6 +496,10 @@ const updateTask = async(req, res) => {
 const deleteMember = async(req, res) => {
     const {type} = req.user;
     const {memberId, projectId} = req.body;
+    console.log("calling delete member");
+    console.log(memberId);
+    console.log("temp");
+    console.log(projectId);
     try{
         if(type === "creater"){
 
@@ -526,13 +530,64 @@ const deleteMember = async(req, res) => {
     
             project.members = newMembers;
             await project.save();
-
+            console.log("member has been deleted");
             return res.status(201).json({valid: true, status: "member has been deleted"});
         }
         else{
             return res.status(501).json({valid: true, status: "you are not allowed to delete member"});
         }
 
+
+    }
+    catch(err){
+        return res.status(401).json({valid: false, stauts: "something went wrong"});
+    }
+
+}
+
+
+
+const deleteTaskForMember = async(req, res) => {
+    const {type} = req.user;
+    const {memberId, projectId, taskId} = req.body;
+    console.log("deleteTaskForMember called");
+    console.log(memberId);
+    console.log(projectId);
+    console.log(taskId);
+    try{
+
+        if(type === "creater"){
+            const member = await Member.findOne({_id: memberId});
+            const newTasks = member.tasks.filter((t) => {
+                if(t !== taskId){
+                    return t;
+                }
+            })
+
+
+            member.tasks = newTasks;
+            await member.save();
+
+
+            const task = await Task.findOne({_id: taskId});
+            const newMembers = task.members.filter((m) => {
+                if(m != memberId){
+                    return m;
+                }
+            })
+
+            task.members = newMembers;
+
+            await task.save();
+
+
+            return res.status(201).json({valid: true, status: "task has been deleted from member"});
+            
+
+        }
+        else{
+            return res.status(501).json({valid: true, status: "you are not allowed to delete a task"});
+        }
 
     }
     catch(err){
@@ -555,6 +610,7 @@ module.exports = {
     updateMember,
     updateTask,
     deleteProject,
-    deleteMember
+    deleteMember,
+    deleteTaskForMember
 
 }

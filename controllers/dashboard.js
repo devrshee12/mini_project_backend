@@ -471,7 +471,7 @@ const getTaskOfMember = async(req, res) => {
 
 const updateTask = async(req, res) => {
     const {type} = req.user;
-    const {projectId, memberId, taskId, name, taskType, status, desc} = req.body;
+    const {taskId, name, taskType, status, desc} = req.body;
     try{
         if(type === "creater"){
             const task = await Task.findOne({_id: taskId});
@@ -488,7 +488,7 @@ const updateTask = async(req, res) => {
         }
     }
     catch(err){
-        return res.status(401).json({valid: false, stauts: "something went wrong"});
+        return res.status(401).json({valid: false, status: "something went wrong"});
 
     }
 }
@@ -540,7 +540,7 @@ const deleteMember = async(req, res) => {
 
     }
     catch(err){
-        return res.status(401).json({valid: false, stauts: "something went wrong"});
+        return res.status(401).json({valid: false, status: "something went wrong"});
     }
 
 }
@@ -591,10 +591,49 @@ const deleteTaskForMember = async(req, res) => {
 
     }
     catch(err){
-        return res.status(401).json({valid: false, stauts: "something went wrong"});
+        return res.status(401).json({valid: false, status: "something went wrong"});
     }
 
 }
+
+
+
+const updateTaskStatus = async(req, res) => {
+    const {desc, taskType, status, taskId} = req.body;
+    try{
+        const task = await Task.findOne({_id:taskId});
+        task.status = status;
+        task.taskType = taskType;
+        task.desc = desc;
+
+        await task.save();
+
+
+        return res.status(200).json({valid: true, status: "task has been updated"});
+    }
+    catch(err){
+        return res.status(401).json({valid: false, status: "something went wrong"});
+    }
+}
+
+
+const getSpecificTask = async(req, res) => {
+    const {taskId} = req.body;
+    try{
+        const task = await Task.findOne({_id:taskId});
+        return res.status(200).json({valid: true, task: task});
+        
+    }
+    catch(err){
+        return res.status(401).json({valid: false, status: "something went wrong"});
+    }
+}
+
+
+
+
+
+
 
 module.exports = {
     getUser,
@@ -611,6 +650,8 @@ module.exports = {
     updateTask,
     deleteProject,
     deleteMember,
-    deleteTaskForMember
+    deleteTaskForMember,
+    getSpecificTask,
+    updateTaskStatus
 
 }

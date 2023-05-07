@@ -141,8 +141,63 @@ const registerMember = async(req, res) => {
 }
 
 
+
+const createTokenForGoogle = async(req, res) => {
+    const {email, type} = req.body;
+    try{ 
+        const creater = await Creater.findOne({email});
+
+        if(creater){
+            const token = jwt.sign(
+                { type: "creater", email: email },
+                process.env.JWT_ACCESS_TOKEN_SECRET,
+                {
+                  expiresIn: "30d",
+                }
+            )
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)), // ms // 30 d
+                httpOnly: true
+            })
+
+            res.status(200).json({valid:true, token});
+
+        }
+        else{
+            console.log("here in creater for temp temp");
+            const newCreater = await Creater.create({
+                email:email,
+                password: "GooglePassword@123",
+                number: "8780280085",
+                name: "devarshee"
+
+            });
+            const salt = await bcrypt.genSalt(10)
+            newCreater.password = await bcrypt.hash(creater.password, salt)
+            await newCreater.save();
+
+            const token = newCreater.generateAuthToken();
+            
+            // res.status(201).json({token});
+            
+            console.log("register token : " + token);
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)), // ms // 30 d
+                httpOnly: true
+            })
+
+            res.status(200).json({valid: true, token});
+        }
+    }
+    catch(err){
+        return res.status(401).json({valid: false, stauts: "something went wrong"});
+    }
+}
+
+
 module.exports = {
     registerCreater,
     login,
-    registerMember
+    registerMember,
+    createTokenForGoogle
 }

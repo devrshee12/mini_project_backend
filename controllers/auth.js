@@ -87,26 +87,21 @@ const login = async(req, res) => {
             }
 
             const dbPassword = member.password;
-            
-            bcrypt.compare(password, dbPassword, (err, data) => {
-                if(err){
-                    return res.status(404).json({"status": "something went wrong"});
-                }
 
-                if(data){
-                    const token = member.generateAuthToken();
-                    console.log("login token member : " + token);
-                    res.cookie("token", token, {
-                        expires: new Date(Date.now() + 120000), // ms
-                        httpOnly: true
-                    })
 
-                    return res.status(200).json({"status": "login successful for member", token});
-                }
-                else{
-                    return res.status(404).json({"status": "invalid password"});
-                }
-            })
+            if(dbPassword === password){
+                const token = member.generateAuthToken();
+                console.log("login token member : " + token);
+                res.cookie("token", token, {
+                    expires: new Date(Date.now() + 120000), // ms
+                    httpOnly: true
+                })
+
+                return res.status(200).json({"status": "login successful for member", token});
+            }
+            else{
+                return res.status(404).json({"status": "invalid password"});
+            }
 
         }
         catch(err){

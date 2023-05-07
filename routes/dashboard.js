@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {getUser, createProject, createMember, getMembers, createTask, getAllTasks, selectTask, assignTask, getTaskOfMember, updateProject, updateMember, updateTask, deleteProject, deleteMember, deleteTaskForMember, getSpecificTask, updateTaskStatus} = require("../controllers/dashboard");
+const {getUser, createProject, createMember, getMembers, createTask, getAllTasks, selectTask, assignTask, getTaskOfMember, updateProject, updateMember, updateTask, deleteProject, deleteMember, deleteTaskForMember, getSpecificTask, updateTaskStatus,getMemberProjects} = require("../controllers/dashboard");
 router.get('/getUser', getUser)
 router.post('/createProject', createProject)
 router.post('/createMember', createMember)
@@ -18,6 +18,7 @@ router.post('/deleteMember', deleteMember)
 router.post('/deleteTaskForMember', deleteTaskForMember)
 router.post('/getSpecificTask', getSpecificTask)
 router.post('/updateTaskStatus', updateTaskStatus)
+router.post('/getMemberProjects', getMemberProjects)
 
 
 module.exports = router

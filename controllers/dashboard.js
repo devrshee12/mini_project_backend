@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Creater = require("../models/Creater");
 const Member = require("../models/Member");
 const Project = require("../models/Project");
@@ -633,6 +634,82 @@ const getSpecificTask = async(req, res) => {
 
 
 
+const {ObjectId} = mongoose.Types
+
+const getMemberProjects = async(req, res) => {
+    const {email} = req.body;
+    // const test = [];
+    
+    // let tempProjectId = ["adsd"];
+    console.log("here email : " + email);
+    
+    try{
+        const member = await Member.findOne({email});
+        // console.log("123144");
+        const rs = member.tasks?.map( async (taskId) => {
+            // console.log(taskId);
+            
+            const task = await Task.findOne({_id:ObjectId(taskId)});
+            // console.log(task.projectId);
+            const project = await Project.findOne({_id:ObjectId(task.projectId)});
+            // return task
+            console.log(project);
+            return project._id;
+        })
+
+        const results = await Promise.all(rs);
+        const finalRes = new Set();
+        const test = results?.map((projectId) => {
+            finalRes.add(projectId.toString());
+            return projectId;
+        });
+
+
+        console.log(finalRes);
+
+        const finalProject = [];
+        for (var it = finalRes.values(), val= null; val=it.next().value; ) {
+            const gotProject = await Project.findOne({_id:ObjectId(val)});
+            finalProject.push(gotProject);
+        }
+
+        // test.map((temp) => {
+        //     finalRes.add(temp);
+        // })
+        // console.log(test);
+
+
+        
+
+
+        // console.log("aafter");
+// 
+        // console.log(tempProjectId);
+
+
+        // console.log("before0");
+
+
+        // console.log(member);
+        // console.log("lskbfkljh");
+
+        
+
+
+
+
+        return res.status(200).json({valid: true, projects:finalProject, memberId:member._id}); 
+        
+        
+
+    }
+    catch(err){
+        console.log(err);
+        return res.status(200).json({valid: false, status:"something went wrong"}); 
+    }
+}
+
+
 
 
 module.exports = {
@@ -652,6 +729,10 @@ module.exports = {
     deleteMember,
     deleteTaskForMember,
     getSpecificTask,
-    updateTaskStatus
+    updateTaskStatus,
+    getMemberProjects
 
 }
+
+
+// memeber api 

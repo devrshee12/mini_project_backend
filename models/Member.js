@@ -33,10 +33,10 @@ const Member = new mongoose.Schema({
 
 
 
-Member.pre('save', async function () {
-    const salt = await bcrypt.genSalt(10)
-    this.password = await bcrypt.hash(this.password, salt)
-})
+// Member.pre('save', async function () {
+//     const salt = await bcrypt.genSalt(10)
+//     this.password = await bcrypt.hash(this.password, salt)
+// })
 
 Member.methods.generateAuthToken = function(){
     console.log(this);
